@@ -1,93 +1,40 @@
-import java.util.*;
+import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        Main main = new Main();
-        main.equilibriumMobile();
-    }
-    int depth = 0;
-    int nodes = 0;
-    long numberFrequency = 0;
-    long topFrequency = 0;
-    String parse;
-    public void equilibriumMobile() {
         Scanner scanner = new Scanner(System.in);
-        int testCases = scanner.nextInt();
-        scanner.nextLine();
+        System.out.println("Enter nested structure:");
+        String input = scanner.nextLine();
+        scanner.close();
 
-        for (int i = 0; i < testCases; i++) {
-            parse = scanner.nextLine();
-            HashMap<Long, Long> similarNumbers = new HashMap<>();
-            StringBuilder number = new StringBuilder();
-            depth = 0;
-            nodes = 0;
-            numberFrequency = 0;
-            topFrequency = 0;
-
-            for (int j = 0; j < parse.length(); j++) {
-                char character = parse.charAt(j);
-                if (Character.isDigit(character)) {
-                    number.append(character);
-                } else if (number.length() > 0) {
-                    long temp = Long.parseLong(number.toString());
-                    long key = temp * (long) Math.pow(2, depth);
-                    similarNumbers.put(key, similarNumbers.getOrDefault(key, 0L) + 1);
-                    nodes++;
-                    number = new StringBuilder();
-                }
-                if (character == '[') {
-                    depth++;
-                } else if (character == ']') {
-                    depth--;
-                }
-            }
-            if (number.length() > 0) {
-                long temp = Long.parseLong(number.toString());
-                long key = temp * (long) Math.pow(2, depth);
-                similarNumbers.put(key, similarNumbers.getOrDefault(key, 0L) + 1);
-                nodes++;
-            }
-            List<Map.Entry<Long,Long>> similarNumbersList = new ArrayList<>(similarNumbers.entrySet());
-            for (int j = 0; j < similarNumbers.size(); j++) {
-                if (similarNumbersList.get(j).getValue() > numberFrequency) {
-                    numberFrequency = similarNumbersList.get(j).getValue();
-                    topFrequency = similarNumbersList.get(j).getKey();
-                }
-            }
-            System.out.println(nodes - numberFrequency);
-        }
+        // Start parsing from the first level (level 1)
+        parseStructure(input, 1, 0);
     }
 
-    class Node{
-        private int weight;
-        private boolean isJunction = true;
-        private Node parent;
-        public List<Node> children = new ArrayList<>();
+    // Function to parse the structure
+    private static int parseStructure(String input, int level, int index) {
+        while (index < input.length()) {
+            char current = input.charAt(index);
 
-        private int costOfChange = 1;
-        public boolean isRoot = false;
-        public int level;
-
-        public Node(){
+            if (current == '[') {
+                // If we encounter '[', it means we go one level deeper
+                index = parseStructure(input, level + 1, index + 1);
+            } else if (Character.isDigit(current)) {
+                // Parse the integer
+                int num = 0;
+                while (index < input.length() && Character.isDigit(input.charAt(index))) {
+                    num = num * 10 + (input.charAt(index) - '0');
+                    index++;
+                }
+                System.out.println("Level " + level + ": " + num);
+            } else if (current == ']') {
+                // If we encounter ']', it means we go one level up
+                return index + 1;
+            } else {
+                // For commas or other characters, just move to the next character
+                index++;
+            }
         }
-
-        public Node setWeight(int weight){
-            this.weight = weight;
-            isJunction = false;
-            return this;
-        }
-
-        public Node setParent(Node parent) {
-            this.parent = parent;
-            return this;
-        }
-
-        public void addChild(Node child) {
-            children.add(child);
-        }
-
-        public String toString(){
-            return isJunction ? "─┐" : "" + weight;
-        }
+        return index;
     }
 }
